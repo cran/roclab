@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to roclab</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to roclab</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(roclab)</span></code></pre></div>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>The <strong>roclab</strong> package implements ROC-Optimizing Binary
+Classifiers, supporting both linear and kernel models.</p>
+<ul>
+<li><strong>Linear models</strong> provide various regularization
+penalties (ridge, lasso, alasso, elastic net, scad, mcp).</li>
+<li><strong>Kernel models</strong> support flexible kernel functions
+(radial, polynomial, linear, laplace).</li>
+<li><strong>Both models</strong> include several surrogate loss
+functions (hinge, hinge2 (squared hinge), logistic, exponential).</li>
+</ul>
+<p>For large-scale data, the model is computationally prohibitive
+because its loss is a U-statistic involving a double summation. To
+reduce this burden, the package adopts an efficient algorithm based on
+an incomplete U-statistic, which approximates the loss with a single
+summation. In kernel models, a Nyström low-rank approximation is further
+applied to efficiently compute the kernel matrix. These approximations
+substantially reduce computational cost and accelerate training, while
+maintaining accuracy, making ROC-Optimizing Binary Classifiers practical
+for large-scale datasets.</p>
+<p>In addition, efficient optimization is performed using
+<strong>Gradient Descent with the Adamax update rule</strong> —a variant
+of Adam, based on the infinity norm—for linear models with the ridge
+penalty and kernel models. For linear models with other penalties (i.e.,
+those involving variable selection), <strong>Proximal Gradient Descent
+with an Adamax adaptive learning rate scheme</strong> is employed.</p>
+</div>
+<div id="example-linear-model" class="section level1">
+<h1>Example: Linear Model</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>n_lin <span class="ot">&lt;-</span> <span class="dv">1500</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>n_pos_lin <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fl">0.2</span> <span class="sc">*</span> n_lin)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>n_neg_lin <span class="ot">&lt;-</span> n_lin <span class="sc">-</span> n_pos_lin</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>X_train_lin <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n_neg_lin, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n_pos_lin, <span class="at">mean =</span>  <span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>y_train_lin <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>, n_neg_lin), <span class="fu">rep</span>(<span class="dv">1</span>, n_pos_lin))</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co"># Fit a linear model</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>fit_lin <span class="ot">&lt;-</span> <span class="fu">roclearn</span>(X_train_lin, y_train_lin, <span class="at">lambda =</span> <span class="fl">0.1</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># Summary</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="fu">summary</span>(fit_lin)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Linear Model Summary </span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; ----------------------</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; roclearn(X = X_train_lin, y = y_train_lin, lambda = 0.1)</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; Number of observations: 1500 </span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 2 </span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (B = 1500 )</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; Intercept: 0.0873 </span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; Iterations: 1426 </span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.05 </span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; Coefficients (first 10):</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt;        V1        V2 </span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt; 0.4844960 0.5398616</span></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>n_test_lin <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>n_pos_test_lin <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fl">0.2</span> <span class="sc">*</span> n_test_lin)</span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>n_neg_test_lin <span class="ot">&lt;-</span> n_test_lin <span class="sc">-</span> n_pos_test_lin</span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>X_test_lin <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n_neg_test_lin, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n_pos_test_lin, <span class="at">mean =</span>  <span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>)</span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>y_test_lin <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>, n_neg_test_lin), <span class="fu">rep</span>(<span class="dv">1</span>, n_pos_test_lin))</span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a>pred_score_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_lin, X_test_lin, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="fu">head</span>(pred_score_lin)</span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt; [1]  0.7313566 -0.5813919  0.1561111 -1.0342995 -1.1555102 -0.5528892</span></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a>pred_class_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_lin, X_test_lin, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="fu">head</span>(pred_class_lin)</span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt; [1]  1 -1  1 -1 -1 -1</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="fu">auc</span>(fit_lin, X_test_lin, y_test_lin)</span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt; [1] 0.9665972</span></span></code></pre></div>
+</div>
+<div id="example-kernel-model" class="section level1">
+<h1>Example: Kernel Model</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>n_ker <span class="ot">&lt;-</span> <span class="dv">1500</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>r_train_ker <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">runif</span>(n_ker, <span class="fl">0.05</span>, <span class="dv">1</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>theta_train_ker <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_ker, <span class="dv">0</span>, <span class="dv">2</span><span class="sc">*</span>pi)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>X_train_ker <span class="ot">&lt;-</span> <span class="fu">cbind</span>(r_train_ker <span class="sc">*</span> <span class="fu">cos</span>(theta_train_ker), r_train_ker <span class="sc">*</span> <span class="fu">sin</span>(theta_train_ker))</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>y_train_ker <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(r_train_ker <span class="sc">&lt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># Fit a kernel model</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>fit_ker <span class="ot">&lt;-</span> <span class="fu">kroclearn</span>(X_train_ker, y_train_ker, <span class="at">lambda =</span> <span class="fl">0.1</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co"># Summary</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">summary</span>(fit_ker)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; Kernel Model Summary </span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; -----------------------------</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; kroclearn(X = X_train_ker, y = y_train_ker, lambda = 0.1, kernel = &quot;radial&quot;)</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; Number of observations: 1500 </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 2 </span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; Kernel parameter: 0.5 </span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (Nystrom, B = 1500 )</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt;   Nystrom landmarks: 39 </span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; Intercept: -1.421 </span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; Iterations: 891 </span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.18 </span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; Theta coefficients (first 10):</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt;  [1] -0.07135333  0.25788424  0.12964322 -0.05642086  0.19505142  0.65529538</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt;  [7]  0.08096419  0.47000919  0.13780996  0.40101365</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; ...</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>n_test_ker <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>r_test_ker <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">runif</span>(n_test_ker, <span class="fl">0.05</span>, <span class="dv">1</span>))</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>theta_test_ker <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_test_ker, <span class="dv">0</span>, <span class="dv">2</span><span class="sc">*</span>pi)</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>X_test_ker <span class="ot">&lt;-</span> <span class="fu">cbind</span>(r_test_ker <span class="sc">*</span> <span class="fu">cos</span>(theta_test_ker), r_test_ker <span class="sc">*</span> <span class="fu">sin</span>(theta_test_ker))</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>y_test_ker <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(r_test_ker <span class="sc">&lt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>pred_score_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_ker, X_test_ker, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="fu">head</span>(pred_score_ker)</span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="co">#&gt; [1] -0.2853417 -0.1786982 -0.2537492 -0.1018808 -0.7098034  0.1883996</span></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a>pred_class_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_ker, X_test_ker, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="fu">head</span>(pred_class_ker)</span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#&gt; [1] -1 -1 -1 -1 -1  1</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="fu">auc</span>(fit_ker, X_test_ker, y_test_ker)</span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a><span class="co">#&gt; [1] 0.9970842</span></span></code></pre></div>
+</div>
+<div id="cross-validation" class="section level1">
+<h1>Cross-Validation</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># 5-fold CV for linear models</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>cvfit_lin <span class="ot">&lt;-</span> <span class="fu">cv.roclearn</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  X_train_lin, y_train_lin,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">20</span>)),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">nfolds =</span> <span class="dv">5</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># Summarize the cross-validation result</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">summary</span>(cvfit_lin)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Cross-validated Linear Model </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; -----------------------</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 20 </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 0.1898714 </span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.9791 (+/- 0.0040) </span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.9783 0.0040</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; 2  0.0139   0.9790 0.0040</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; 3  0.0192   0.9790 0.0040</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; 4  0.0267   0.9789 0.0037</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; 5  0.0370   0.9789 0.0039</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; 6  0.0513   0.9784 0.0045</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; 7  0.0712   0.9789 0.0039</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; 8  0.0987   0.9785 0.0040</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; 9  0.1370   0.9786 0.0040</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; 10 0.1900   0.9791 0.0040</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt; ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_lin)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># 5-fold CV for kernel models</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>cvfit_ker <span class="ot">&lt;-</span> <span class="fu">cv.kroclearn</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  X_train_ker, y_train_ker,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">20</span>)),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">nfolds =</span> <span class="dv">5</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># Summarize the cross-validation result</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">summary</span>(cvfit_ker)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Cross-validated Kernel Model </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; ------------------------------</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 20 </span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 0.03700021 </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.9997 (+/- 0.0004) </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.9988 0.0008</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 2  0.0139   0.9996 0.0003</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; 3  0.0192   0.9996 0.0004</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; 4  0.0267   0.9993 0.0004</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; 5  0.0370   0.9997 0.0004</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; 6  0.0513   0.9990 0.0008</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; 7  0.0712   0.9989 0.0009</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt; 8  0.0987   0.9961 0.0024</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; 9  0.1370   0.9832 0.0159</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; 10 0.1900   0.9868 0.0138</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_ker)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="real-data-example-1-ionosphere" class="section level1">
+<h1>Real Data Example 1: Ionosphere</h1>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(mlbench)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;mlbench&#39; was built under R version 4.4.3</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">data</span>(Ionosphere)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>X_iono <span class="ot">&lt;-</span> Ionosphere[, <span class="sc">-</span><span class="dv">35</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>y_iono <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(Ionosphere<span class="sc">$</span>Class <span class="sc">==</span> <span class="st">&quot;bad&quot;</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>train_idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(X_iono)), <span class="at">size =</span> <span class="dv">200</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>X_train_iono <span class="ot">&lt;-</span> X_iono[train_idx, ]</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>y_train_iono <span class="ot">&lt;-</span> y_iono[train_idx]</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>X_test_iono  <span class="ot">&lt;-</span> X_iono[<span class="sc">-</span>train_idx, ]</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>y_test_iono  <span class="ot">&lt;-</span> y_iono[<span class="sc">-</span>train_idx]</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co"># Fit a linear model</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>fit_iono_lin <span class="ot">&lt;-</span> <span class="fu">roclearn</span>(X_train_iono, y_train_iono, <span class="at">lambda =</span> <span class="fl">0.1</span>, <span class="at">approx=</span><span class="cn">TRUE</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; Warning: Removing constant columns: V2</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; [V1]: treated as categorical and one-hot encoded.</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="fu">summary</span>(fit_iono_lin)</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; Linear Model Summary </span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; ----------------------</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; roclearn(X = X_train_iono, y = y_train_iono, lambda = 0.1, approx = TRUE)</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; Number of observations: 200 </span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 33 </span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (B = 200 )</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="co">#&gt; Intercept: 1.3041 </span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt; Iterations: 1164 </span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.04 </span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a><span class="co">#&gt; Coefficients (first 10):</span></span>
+<span id="cb8-40"><a href="#cb8-40" tabindex="-1"></a><span class="co">#&gt;          V3          V4          V5          V6          V7          V8 </span></span>
+<span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a><span class="co">#&gt; -0.40674510 -0.18973373 -0.42204641 -0.22075386 -0.17022688 -0.43640505 </span></span>
+<span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a><span class="co">#&gt;          V9         V10         V11         V12 </span></span>
+<span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a><span class="co">#&gt; -0.12857765 -0.24904508  0.08956809 -0.11456464 </span></span>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a><span class="co">#&gt; ...</span></span>
+<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-46"><a href="#cb8-46" tabindex="-1"></a><span class="co">#&gt; Categorical variables dummy-encoded:</span></span>
+<span id="cb8-47"><a href="#cb8-47" tabindex="-1"></a><span class="co">#&gt; [1] &quot;V1&quot;</span></span>
+<span id="cb8-48"><a href="#cb8-48" tabindex="-1"></a><span class="co">#&gt; Removed columns:</span></span>
+<span id="cb8-49"><a href="#cb8-49" tabindex="-1"></a><span class="co">#&gt; [1] &quot;V2&quot;</span></span>
+<span id="cb8-50"><a href="#cb8-50" tabindex="-1"></a></span>
+<span id="cb8-51"><a href="#cb8-51" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb8-52"><a href="#cb8-52" tabindex="-1"></a>pred_score_iono_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_iono_lin, X_test_iono, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb8-53"><a href="#cb8-53" tabindex="-1"></a><span class="fu">head</span>(pred_score_iono_lin)</span>
+<span id="cb8-54"><a href="#cb8-54" tabindex="-1"></a><span class="co">#&gt; [1]  0.7813989 -0.4333132  1.0361641  1.5973041  0.2972169 -0.4974081</span></span>
+<span id="cb8-55"><a href="#cb8-55" tabindex="-1"></a></span>
+<span id="cb8-56"><a href="#cb8-56" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb8-57"><a href="#cb8-57" tabindex="-1"></a>pred_class_iono_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_iono_lin, X_test_iono, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" tabindex="-1"></a><span class="fu">head</span>(pred_class_iono_lin)</span>
+<span id="cb8-59"><a href="#cb8-59" tabindex="-1"></a><span class="co">#&gt; [1]  1 -1  1  1  1 -1</span></span>
+<span id="cb8-60"><a href="#cb8-60" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb8-62"><a href="#cb8-62" tabindex="-1"></a><span class="fu">auc</span>(fit_iono_lin, X_test_iono, y_test_iono)</span>
+<span id="cb8-63"><a href="#cb8-63" tabindex="-1"></a><span class="co">#&gt; [1] 0.9184803</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># 5-fold CV for linear models</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>cvfit_iono_lin <span class="ot">&lt;-</span> <span class="fu">cv.roclearn</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  X_train_iono, y_train_iono,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">10</span>)),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">approx=</span><span class="cn">TRUE</span>, <span class="at">nfolds=</span><span class="dv">5</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; Warning: Removing constant columns: V2</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; [V1]: treated as categorical and one-hot encoded.</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">summary</span>(cvfit_iono_lin)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; Cross-validated Linear Model </span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; -----------------------</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 10 </span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 0.3158114 </span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.8633 (+/- 0.0965) </span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.8072 0.1232</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; 2  0.0199   0.8236 0.1222</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; 3  0.0398   0.8408 0.0943</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; 4  0.0794   0.8624 0.0794</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; 5  0.1580   0.8501 0.0866</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; 6  0.3160   0.8633 0.0965</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; 7  0.6300   0.8489 0.0896</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; 8  1.2600   0.8250 0.1270</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 9  2.5100   0.8068 0.1361</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; 10 5.0000   0.7776 0.1213</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_iono_lin)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAJACAMAAABlpiR1AAABR1BMVEUAAAAAACsAAFUAAP8AKysAK1UAK4AAVaorAAArACsrAFUrKwArKysrK1UrVVUrVYArVaorgKorgNQzMzNNTU1NTWtNTYhNa6ZNiMRVAABVACtVKwBVKytVK1VVVVVVVYBVVapVgIBVgKpVgNRVqtRVqv9mZmZrTU1rTWtrTYhra6ZrpsRrpuGAKwCAVQCAVSuAVVWAVYCAgFWAgKqAgNSAqoCAqtSA1KqA1P+ITU2ITWuITYiIa6aIxP+ma02ma2uma4imiE2mxKam4f+qVQCqVSuqVVWqgCuqgFWqgICqqoCqqtSq1ICq1NSq1P+q/9Sq///EiE3E///UgCvUgFXUqlXUqoDU1IDU1KrU1NTU1P/U/6rU///hpmvh///r6+v/AAD/qlX/qoD/qqr/xIj/1ID/1Kr/4ab//6r//8T//9T//+H///8kbDUdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAbxklEQVR4nO2d63sUR3aHBzBI2WSzDoiL4lyc2OCFQHY32TgGAk4W4lyXYMl2sgkIlKDVrf//z+n79IxOd1dNV/ecOvP+ngc0kqbO26fnVXVXz2g0SwhRnNm6N4CQriAoUR0EJaqDoER1EJSoDoIS1UFQojoISlQHQYnqrCTo2T//7mz20efDyGePrr3J/lWfbTW/efTHr4UBjbsczu7mH/cvF3c82b0ebMuIoqwi6NH2LM/Hg8idglbeLQ5o3OXlbGvhjoWgrlt2tF1xifKsIOjJ7uzj/06S//yknMRWzFzO4jMvQY+2f+/SV8075oK6btnZL958/9nqW04mzAqC7s/yo2k+DaXS7M8uv0p++8lsdvVV+sWzn81mlz5v3ijG5B6d7KaKfZ8ehC991pxBv9+eXf11bl/5vbNH6SyYQrKqP86qNu5S1fv37evzwqWgzS1bwi5szskvM0f9OyfTx1/Qs0fV7Pab7JOPtmfX3hzmh9Z0TsvVmqUTWH2jyNF2dis7cdyf1fcoBc2/cvWTraT+XinoUVW1cZdqG7bKCbgp6MKWLWKXNifNNxenaKIw/oLm02CV9IG/nv//eWbRtTdH2x+/SbXYSuob1f2yWy8vv04lepXk36gEPdm99GXy20ez7CvV93Lvzh5lU94P6afzu5TJTC+WSU1BF7ZsEbu0OdkXB52fkKkyWNBMkPKRf3npq6Ptj/7s19nt+kaZ/XQiLEf+5l9/vj2bC3q0XSxvmt/LvTuqD+ILd8lJ6beLat2C1tjlzamKE+0ZLGh2oC2OpMlhasPL7Ej6k1dJfSM/Ol/PhcjnvHKhPRe0mAnzua7+Xu7dYXHAT4/xjbvkKe+XudkjaI2tt6vMy6t/ykloDBlyDvrdT15dEDT54ZNSnfJGKWh2x2Lem/3+X//b/+xKgs6/1yNoea6anV3sF4v53MSFLas2tsA2tqu8+93vOAmNIQNW8Se72SllIWh1iM+/8V9/Wa5G6hvZqEt/u7tVudw8By0OtsVxuPpeeYifL7Gqu+Qp10cnu+mH+oJ99rG5ZYvYpc3JfzA4CY0hg66DXi9dmS+SDmd/8CY5+6ds0itvVKOOtv+kOMJvvckuHxVyloukz7MKW43v5RNjukj6MknXRpdfz++S57D0MPuBONrOLx59v52Rmlu2iF3anEzrk8+Sk09X33Fkmgx5JmmrnsyWLzNl6pU3qkHpF7Jprfx6Q9DiUJ5dQ5p/LzuIX6+O8deT+V3yVDP14Wxr4XC/sGUittycHHv281eHXK1Xn5Wei//tz7bLZ7yrp4OOFi7Uf/ymcaPKfqFNfkn/y5fF2UExPD09vPof2Qlm/b3k5JNZOptmVYsn1uu7JAuH+vxc949S83785fKWLWEXNqc4LzjavsZpqPrwaiaiOghKVAdBieogKFEdBCWqg6BEdRCUqA6CEtVBUKI6CEpUx1/Qd33pv0eIGKIYaiUcBUH1UN5PAYlthyGoHgqCSoUQVA0FQaVCCKqGgqBSIQRVQzHUCoJapBhqBUEtUgy1gqAWKYZaQVCLFBZJUiEEVUNBUKkQgqqhIKhUCEHVUBBUKoSgaiiGWkFQixRDrSCoRYqhVhDUIsVQKwhqkcIiSSqEoGooCCoVQlA1FASVCrkIenx/L/94+njn9gGCjhUElQo5CPph51Yu6PnzZ8nbOwgaNSQ2ioOg3978VTGDnj7dqydTBI0UEhvF5xB//OAgOX3yIr11I03XAEICx0XQD7crQbNM90O0KRRDrax7BkXQMcIiSSrkISjnoOMGQaVCHoKeP3/IKn7EIKhUyFXQ7B/XQUcNgkqFXAQVM902bgrFUCsIapFiqBUEtUgx1AqCWqQYagVBLVJYJEmFEFQNBUGlQgiqhoKgUiEEVUNBUKkQgqqhGGoFQS1SDLWCoBYphlpBUIsUQ60gqEUKiySpEIKqoSCoVAhB1VAQVCqEoGooCCoVQlA1FEOtIKhFiqFWENQixVArCGqRYqgVBLVIYZEkFUJQNRQElQohqBoKgkqFEFQNBUGlQgiqhmKoFQS1SDHUCoJapBhqBUEtUgy1gqAWKSySpEIIqoaCoFIhBNVAuZflffbfyKDodhiC6qEwg0qFEFQNZfzZM0tkOwxB9VAQVCqEoGooCCoVQlA1FASVCiGoGgqLJKkQgqqhrEXQe3XGpAwotLKgJHTer418b21k5zCDrp+yvkN8+LNfBTPodNu4KZT1LZIQdLwYoiCoVEifoH6n7QjqGQQNso3OuwxBPYOgQbZxEwVlkSQVQlA1lPgEbT8bQ9AglGXo+Pu7K/EJ2j4YQYNQnMkI2h4EHY/iTGaR1B4EHY/iTFYt6PDrcgjqnfgEHf6qi/CaSEHQINsYn6DtgweRgw9G0CDbuOr+Hmkem0TQQYskBI1DUL/BzmQE9SQjaBcFQTuia4f1BkGdBiOoJ1m5oBOuaHXtbxZJHZSVMuIMuon7G0E7KCsFQZ0GI6gnGUHrBiYhI6gnGUHrBiYhs0jyJCNo3cAkZAT1JCNo3cAkZAT1JCNo3cAkZAT1JCNo3cAkZBZJnmQErRuYhIygnmQErRuYhIygnmQErRuYhIygnmQErRuYhMwiyZOMoHUDk5AR1JOMoHUDk5AR1JOMoHUDk5AR1JOMoHUDk5BZJHmSEbRuYBIygnqSEbRuYBIygnqSEbRuYBIygnqSEbRuYBIyiyRPMoLWDUxCRlBPMoLWDUxCRlBPMoLWDUxCRlBP8pSCnj7euX2Q3zr+YufWHoL6Dh5EDj5Y1w7rTb+g58+fJW/vFKamt0pXEdR98CBy8MG6dlhv+gU9fbqXHN/PJs7jBwfJ6ZMXCOo5eBA5+GBdO6w3/YLOtZzfupGmdUCVQX+hlMGbMdg57YJ+uF1pmR/ibzKD+g52zYYtktzewKtf0MaBPV0k/cXXCOo72DUbJqgbuV/Q+Tlo9RmC+g12DYJKhXoFPX/+sFrFp/NocQtBfQa7BkGlQr2CltdBs0n0w85OfZUJQZ0HDyIHHxzZDnMQtCXD2UEGR7a/1z84sh2GoE6DEdSTjKB1A5OQEdSTjKB1A5OQWSR5khG0bmASMoJ6khG0bmASMoJ6khG0bmASMoJ6khG0bmASMoskTzKC1g1MQkZQTzKC1g1MQkZQTzKC1g1MQkZQTzKC1g1MQmaR5ElG0LqBScgI6klG0LqBScgI6klG0LqBScgI6klG0LqBScgskjzJCFo3MAkZQT3JCFo3MAkZQT3JCFo3MAkZQT3JCFo3MAmZRZInGUHrBiYhI6gnGUHrBiYhI6gnGUHrBiYhI6gnGUHrBiYhTyHo+/dDDLW6wxDUafD4gr4vsvJ4qzsMQZ0GI6gnGUHrBgKTr9y74kiRsjL5/fuBhiLoZgh6JRVUMBRBPckIWjcQlrwWQa9cuVILekXChyQjqDM7yOCg+zu1IxO0SB9Fije5JjUm0GV4WDKCOrODDA62v0st5uegTUvHEHTxp2DpCH/hRyQYGUGd2UEGh9nfDRvuLX8j+15gQUX9Lp6A+liKoHYFXbRAGuxsSj+5o5Q82BGNoEYFvfDwt+7vi2emfuTe8e2DB5IXgqDO7CCDB+1v6WHv2d/dmrWQ3Wbgns3uLoKg1gRte7id9nebLBcHe5xHulwDba2GoKYE9Z0ExW6FyfTehe/3bso8rhfpxboIakfQFc4EO7pt6lJfo/K+SpTF61mkZQKCGhF0tdVGX7fVxf3qKn/P3eX4P805R8kvIZCyMYL2RuGfN00fzzHJuaCrD1+NPP/RmJo86WD7M+igS5luE0LLE/muCf8SAikbM4MOZwcZ7La/PY66Q/a3+4HWmewILk4uXO6KoM7sIIMd9rffOeG4+3uswcWPhkunCOrMDjK4b397r1jWJ2iQX5rr7RdBndlBBnfu72CvW4tH0Hd9XSOoMzvIYGE76sPdSieE8Qv6Lmu+9Y4I6swOMvjidngsGJzJsQnaMY0iqDM7yOAWQQOT1S+SpMGyowjqzA4yeGk7qovWgclRCvpOdBRBndlBBje2ozqwj3A1MlZB3110FEGd2UEGl9uxcNapeH+vZfCCowjqzA4yOBHW64r3d1fGfPOw+S5CUGd2kMHOL4ofRI5e0Hf1nkJQZ/bgwdnUGdn+7sr4b7/Y9guqindYtIJeiXNC6Mok7w8qXntSvMOiFLR50mlI0KlO2i86qniHRSfo8ooIQT0H563Es6qMSlDpGUwE9Rw8vy43JnkDBW15chlBPQcv/Ir/aOQNE7TjxR+GBF3DH1G4svSGacHIGyRozyuTENSTLL0HheIXLygVtPyZdnjZHIJ6kiN7+ZdOQatfMHe4K4J6kltfQLuqoxsrqNtdDQk69SKpzvx4FYxsWND6fQjc7o6gnoP7fonLW9JNErTeP2bfyWX9g3t3mK+kGyLo0llQuP3tm40XNIuPoxsgqPAzu4mC6vpjss4TqXFBW/YDgnpmlB3m5KhdQbuubSCoZ8baYf0TqU1B+/pGUM+MucO6HyxzgjpdFN5EQRUtki7G82AXq6DDzrzFBoYMdiYj6Du/5UKMgnpdX0PQsQYP22HCY2hBUP+nehF0rMGDd9jyYxmroNWTQau9DGETBVW7SLqY5oMaqaD1X7xw3FLfDa8bGDLYmYygF9P5RkORCOq4latseN3AkMHOZAQV0/66HgStGxgy2JmMoG2JVtCp/uKFIUEjWSQtpjiVc6JIUbKK9w+CjjU49A7LJ6ILik4p6OnjndsH+a3jL3Zu7SGo7+BB5OCDR9phDu+n0T64I/2Cnj9/lry9k5v65EXytnQVQd0HDyIHHzzeDut7F9LOwW3pF/T06V5yfD+bOI8fHOSfIajfYNdEuUhaekKmi9IzWE6/oLmW6dzZnEFvpGkdUCWCv1Cqa/D7tZHDDb7i+TdtA/wx2Q+3K0EbZ6MJM6j7YNfEP4PmyafRtcygxz99kXy4xSHed7BrjAiaK7qWc9DGXIqgHoMHkYMPnmSHOT/FHWQV/7BcxTODrjZ4EDn44Kl2mJui4a6DZpPoh52dm9UEiqDOgweRgw+eboet/Bt3C4X6BW3JcHaQwQjqOXjKHdZ/pEfQMGQWSZ7kmtKjKIKGISOoJ7lB8f+V0IVCCOoyGEE9yYuUdkURNAwZQT3Jy5Q2RRE0DJlFkif5ImXFtzhCUKfBCOpJFnfYKn9WFUGdBiOoJ7llh/m/iyGCOg1GUE9y6w5z+aX6hUII2hhXx4UiVliRnMfyIqkZrzcqRtCVKVIQtIMyT8+7PiwUQtBVKVIQtIPSTHWkR9AwQVBPssMOyxTt/910BF2ZIoVFUgflQlz+3BCCrkyRgqAdlItB0FBBUE8ygtYNhCY7U6QgaAdFCOeggcIiyZM85VvfICiCepMRtG4gNNmZIgVBOyjOgxcKIeiqFCkI2kFxHrxQCEFXpUhhkdRBcR68UAhBV6VIQdAOivPghUIIuipFSvjXUTlXcL1j/IKe7N5NkrNH194gaCdFyiCyK2QYOXpBj7av5x9fXn6NoF0UKSySOijOgxcKXRD05dbyDQR12d/Dj9IIKhVaFjQ/wOc57J5Ch7ODDFYj6PAgqFQIQVelBA+CSoWWBT17dL28td+9TBrODjLYkKAskqRCy4Im++XEOTcVQXUL6nf2G72gyctLXyXZob7nOtNwdpDBCBqAEpegydH2bDbLLUXQDkqcEAuCumU4O8hgQ4IOWiQ5B0Gd2UEGI6hnYhf0ZHdWpOeJJAQNHgSVCrXOoIc9Z6HD2UEGI6hnzAjKU509lDghhgTlmaRuSpyQzRG0N0r+vCnpTwQPFTOoNyVOiKEZlHPQbkrwsEiSCrUKGucqfvirMl0o4wRBpULLgtbXQfue6xzODjJ4fcfF4EFQqVDrDNqX4ewggxHUM4YE/SbWRVL4sEhqz5oETQ/10a7iwwdB27MWQffTk9C7y0oiqAGIBUHzdVL3NSYEjRUSv6D7+QK+5yIogo4QFklSoWVBy9/qRNDpKQgqFbowgx7mp58IOj0FQaVCFwTNfp+Tc9B1UBBUKiQIWk+jCDophUWSVEgWNJ9GuQ46LQVBpUJtgqb5PwSdlIKgUqEOQbsznB1kMIIGoCCodzZRUBZJUiEEVUNBUKkQgqqhIKhUCEHVUBBUKoSgaigskqRCCKqGgqBSIQRVQ0FQqRCCqqEgqFQIQdVQWCRJhRBUDQVBpUIIqoaCoFIhBFVDQVCpEIKqobBIkgohqBoKgkqFEFQNBUGlQgiqhoKgUiEEVUNhkSQVQlA1FASVCiGoGgqCSoUQVA0FQaVCCKqGwiJJKoSgaigIKhVCUDUUBJUK9Qt6+njn9kF24+1OlmcIGjPEnqDnz58lb+9Un30oXEXQEcIiSSrUK+jp073k+P5e+cmTF6Mf4v3+1BGCesacoMcPDuZellPpjTStA6rwFzM9835t5Dj/VmeZ7KBeCdqYQEc+xDuHGdQzpmfQ+RkogkYKWaYM/9uR6xa0eQ767cP514ezgwRB101Zt6Dnzx9Wp57nX8+P8AgaJ8SeoOV10GwSbZ6CImicEIOCtmQ4O0gifVSlrG+RNCgI2hkE9QyCOrODBEE9g6DO7CBBUM8gqDM7SAwJGmkrCNqZSB/VtUEQ1J0dJJE+qmuDIKg7O0gifVTXBkFQd3aQRPqoSmGRJBUaRdDhr0BwDoJ6BkF9t3FYDFEQVCqEoGooCCoVQlA1lEhbQdBNoUTaCoJuCiXSVhB0UyiRtoKgm0JhkSQVQlA1FASVCiGoGgqCSoUQVA0FQaVCCKqGEmkrCLoplPhaaX/NBYIapBhqBUEtUgy1gqAWKZEukgZREDQiCoJKhRBUDQVBpUIIqoaCoFIhBFVDMdQKglqkGGoFQS1SDLWCoBYphlpBUIsUFklSIQRVQ9kwQd3ePAFB9VA2TFDHQgiqhoKgUiEEVUMx1AqCWqQYagVBLVIMtaJBUEImDDPo+ikskqRCCKqGgqBSIQRVQ0FQqRCCqqEgqFQIQdVQDLWCoBYphlpBUIsUQ60gqEWKoVYQ1CKFRZJUCEHVUBBUKoSgaigIKhVCUDUUBJUKIagaiqFWENQixVArCGqRYqgVBLVIMdQKglqksEiSCiGoGgqCSoUQVA0FQaVCCKqGgqBSIQRVQzHUCoJapBhqBUEtUgy1gqAWKYZaQVCLFBZJUiEEVUNBUKkQgqqhIKhUCEHVUBBUKoSgaiiGWkFQixRDrSCoRYqhVhDUIsVQKwhqkcIiSSqEoGooCCoVQlA1FASVCiGoGgqCSoUQVA3FUCsIapFiqBUEtUgx1AqCWqQYagVBLVJYJEmF+gU9fbxz+yC/df585+YLBB0rCCoV6hX0/Pmz5O2d/Oa3z5IPpasIGj4IKhXqFfT06V5yfH+vvMUhfrwgqFSoV9DjBwfJ6ZMX+a1/KA/xN9K0DiAkfNoFzQ7qpaBfPMt1LTLdD9GmUAy1sq4ZtLqFoNFCYqP0C9o4B/07BI0eEhulX9Dz5w8bq3gO8eOFRZJUqFfQ8jpoNommt27VC/nptnFTKAgqFeoXtCXTbeOmUBBUKoSgaigIKhVCUDUUQ60gqEWKoVYQ1CLFUCsIapFiqBUEtUhhkSQVQlA1FASVCiGoGgqCSoUQVA0FQaVCCKqGYqgVBLVIMdQKglqkGGoFQS1SDLWCoBYpLJKkQgiqhoKgUiEEVUNBUKkQgqqhIKhUCEHVUAy1gqAWKYZaQVCLFEOtIKhFiqFWENQihUWSVAhB1VAQVCqEoGooCCoVQlA1FASVCiGoGoqhVhDUIsVQKwhqkWKoFQS1SDHUCoJapLBIkgohqBoKgkqFEFQNBUGlQgiqhoKgUiEEVUMx1AqCWqQYagVBLVIMtYKgFimGWkFQixQWSVKhlQUlofN+3RugOcyg66cwg0qFEFQNBUGlQgiqhmKoFQS1SDHUCoJapBhqBUEtUgy1gqAWKSySpEIIqoaCoFIhBFVDQVCpEIKqoSCoVAhB1VAMtYKgFimGWkFQixRDrSCoRYqhVhDUIoVFklQIQdVQEFQqhKBqKAgqFUJQNRQElQohqBqKoVYQ1CLFUCsIapFiqBUEtUgx1AqCWqSwSJIKIagaCoJKhRBUDQVBpUIIqoaCoFIhBFVDMdQKglqkGGoFQS1SDLWCoBYphlpBUIsUFklSIQRVQ0FQqRCCqqEgqFQIQdVQEFQqhKBqKIZaQVCLFEOtIKhFiqFWENQixVArCGqRwiJJKoSgaigIKhVCUDUUBJUK9Qt6+njn9kF+6+3Ozs6tPQQdKQgqFeoV9Pz5s+Ttnfzmt8+YQWOHxEbpF/T06V5yfD+bN8+/foGgsUNio/QLevzgIDl98qI41u/s5JPojTStAwgJn3ZBP9yuBD3+6YvGLDrdD9GmUAy1sp4ZNE99HjrdNm4KhUWSVKhX0Pk5KIKOGwSVCvUKev78YbmKzw7253/PZaaxgqBSoV5By+ug2ST6dmfnZn2sn24bN4WCoFKhfkFbMt02bgrFUCsIapFiqBUEtUgx1AqCWqQYagVBLVJYJEmFEFQNBUGlQgiqhoKgUiEEVUNBUKkQgqqhGGoFQS1SDLWCoBYphlpBUIsUQ60gqEUKiySpEIKqoSCoVAhB1VAQVCqEoGooCCoVWlnQ3lj6vU9DvUTaCoJ2xlAvkbaCoJ0x1EukrSBoZwz1EmkrIwhKSLggKFEdBCWqg6BEdRCUqE4oQedvx1zfaryxU1yZ91I20fxCbKkehbKH6FoJJOj87ZjrWx/m7xoeVxpvLV000fxCbKkehbKH+FoJJOj8rfCqW9/e/FWkM2jjbf2KJpbe5y+m1I9C2UN8rQQSdP5moo1bUe2IeRbeGDVrYumdUuNK+SiUPcTXSiBB52/H3Hhj5kgFnXeQFE0sfCG2lI9C2UN8rTCDXggzqKaMdg4ar6AL52nHcZ+D1o/Cpp+Dzt+OeX4rrh0xz7yDpGhi4QuxpXwUyh7iayXsddB8vjFyHbRxGIju4mEj+TnK/GGJrhWeSSKqg6BEdRCUqA6CEtVBUKI6CEpUB0Enyg9fXrxF+oOgoXP0O18JX/2m8cXDzybbmPiDoKEjCrp/Pf3vHy/dbXxGnIKgoSMJevSj1+l/n5394k3rXYgcBA2dzL6zR7PZVnr7ZHd26W9SOV9eK8z839f5h7NHW2vcwLiCoKGTCpoJmP072b2e/rv8+mS3FHK/PMa/vPx6fRsYVxA0dFJBDzP/0v/yj/uXXx9tFyedmbB59i9xjHcMgoZOJmh2RE8/7ucff1QLun/1z4v7IKhzEDR02gU92b37L8W5KII6B0FDJxM08686xB/Wh/jU13KVhKDOQdDQaV0kpRNocvTLk08TFkkeQdDQWb7M9FepjPmxPj/w5xfruczkHgQdO5mXS1fmT/6QI7xrEHTEZOeixWy5+OQmT3W6B0HHzP6sONQnyXd35189+nRNmxNjEHSi8HK71YKgRHUQlKgOghLVQVCiOghKVAdBieogKFEdBCWqg6BEdRCUqM7/A6pXns4mv+z6AAAAAElFTkSuQmCC" /><!-- --></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Fit a kernel model</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>fit_iono_ker <span class="ot">&lt;-</span> <span class="fu">kroclearn</span>(X_train_iono, y_train_iono, <span class="at">lambda =</span> <span class="fl">0.1</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>, <span class="at">approx=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Warning: Removing constant columns: V2</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [V1]: treated as categorical and one-hot encoded.</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">summary</span>(fit_iono_ker)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; Kernel Model Summary </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; -----------------------------</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; kroclearn(X = X_train_iono, y = y_train_iono, lambda = 0.1, kernel = &quot;radial&quot;, </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt;     approx = TRUE)</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; Number of observations: 200 </span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 33 </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; Kernel parameter: 0.03030303 </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (Nystrom, B = 200 )</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt;   Nystrom landmarks: 14 </span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; Intercept: 0.7425 </span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; Iterations: 1276 </span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.01 </span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; Theta coefficients (first 10):</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt;  [1] -0.87955477  0.22849258 -0.33857814 -0.67966979 -0.04122377 -0.17061431</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt;  [7]  0.08362898 -0.76337429  0.35662077 -0.52693062</span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; ...</span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="co">#&gt; Categorical variables dummy-encoded:</span></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co">#&gt; [1] &quot;V1&quot;</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co">#&gt; Removed columns:</span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co">#&gt; [1] &quot;V2&quot;</span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>pred_score_iono_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_iono_ker, X_test_iono, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="fu">head</span>(pred_score_iono_ker)</span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="co">#&gt; [1]  0.1672607 -0.6231523  0.2522829  0.4332831 -0.2635053 -0.6066902</span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a></span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a>pred_class_iono_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_iono_ker, X_test_iono, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="fu">head</span>(pred_class_iono_ker)</span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a><span class="co">#&gt; [1]  1 -1  1  1 -1 -1</span></span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a></span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="fu">auc</span>(fit_iono_ker, X_test_iono, y_test_iono)</span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="co">#&gt; [1] 0.8999618</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># 5-fold CV for kernel models</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>cvfit_iono_ker <span class="ot">&lt;-</span> <span class="fu">cv.kroclearn</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  X_train_iono, y_train_iono,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">10</span>)),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">approx=</span><span class="cn">TRUE</span>, <span class="at">nfolds=</span><span class="dv">5</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Warning: Removing constant columns: V2</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; [V1]: treated as categorical and one-hot encoded.</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="fu">summary</span>(cvfit_iono_ker)</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; Cross-validated Kernel Model </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; ------------------------------</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 10 </span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 0.01994737 </span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.9153 (+/- 0.0226) </span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.8981 0.0560</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; 2  0.0199   0.9153 0.0226</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; 3  0.0398   0.8671 0.0773</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; 4  0.0794   0.8608 0.0530</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co">#&gt; 5  0.1580   0.8189 0.0580</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt; 6  0.3160   0.8189 0.0665</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="co">#&gt; 7  0.6300   0.7965 0.0450</span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co">#&gt; 8  1.2600   0.7944 0.0879</span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a><span class="co">#&gt; 9  2.5100   0.8041 0.0649</span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co">#&gt; 10 5.0000   0.8137 0.0387</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_iono_ker)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="real-data-example-2-spam-larger-dataset" class="section level1">
+<h1>Real Data Example 2: Spam (larger dataset)</h1>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># Prepare data</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>X_spam <span class="ot">&lt;-</span> spam[, <span class="sc">-</span><span class="dv">58</span>]</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>y_spam <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(spam<span class="sc">$</span>type <span class="sc">==</span> <span class="st">&quot;spam&quot;</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>train_idx <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(X_spam)), <span class="at">size =</span> <span class="dv">3000</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>X_train_spam <span class="ot">&lt;-</span> X_spam[train_idx, ]</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>y_train_spam <span class="ot">&lt;-</span> y_spam[train_idx]</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>X_test_spam  <span class="ot">&lt;-</span> X_spam[<span class="sc">-</span>train_idx, ]</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>y_test_spam  <span class="ot">&lt;-</span> y_spam[<span class="sc">-</span>train_idx]</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co"># Fit a linear model</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>fit_spam_lin <span class="ot">&lt;-</span> <span class="fu">roclearn</span>(X_train_spam, y_train_spam, <span class="at">lambda =</span> <span class="fl">0.1</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="fu">summary</span>(fit_spam_lin)</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; Linear Model Summary </span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; ----------------------</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; roclearn(X = X_train_spam, y = y_train_spam, lambda = 0.1)</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co">#&gt; Number of observations: 3000 </span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 57 </span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (B = 3000 )</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="co">#&gt; Intercept: -0.5147 </span></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="co">#&gt; Iterations: 10 </span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.01 </span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="co">#&gt; Coefficients (first 10):</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="co">#&gt;          make       address           all         num3d           our </span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a><span class="co">#&gt;  4.321339e-06 -5.145267e-06  1.017238e-05  5.731498e-06  1.621501e-05 </span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a><span class="co">#&gt;          over        remove      internet         order          mail </span></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a><span class="co">#&gt;  5.582747e-06  1.344279e-05  7.710516e-06  3.596203e-06  7.202070e-06 </span></span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a><span class="co">#&gt; ...</span></span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a></span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a>pred_score_spam_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_spam_lin, X_test_spam, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a><span class="fu">head</span>(pred_score_spam_lin)</span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a><span class="co">#&gt;          3          6          8         10         14         15 </span></span>
+<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a><span class="co">#&gt; 10.4085857 -0.2464476 -0.2763554  2.8799679 -0.3900616  0.4386678</span></span>
+<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a>pred_class_spam_lin <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_spam_lin, X_test_spam, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a><span class="fu">head</span>(pred_class_spam_lin)</span>
+<span id="cb14-52"><a href="#cb14-52" tabindex="-1"></a><span class="co">#&gt;  3  6  8 10 14 15 </span></span>
+<span id="cb14-53"><a href="#cb14-53" tabindex="-1"></a><span class="co">#&gt;  1 -1 -1  1 -1  1</span></span>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1"></a></span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1"></a><span class="fu">auc</span>(fit_spam_lin, X_test_spam, y_test_spam)</span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1"></a><span class="co">#&gt; [1] 0.7624179</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># 5-fold CV for linear models </span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>cvfit_spam_lin <span class="ot">&lt;-</span> <span class="fu">cv.roclearn</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  X_train_spam, y_train_spam,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">10</span>)), <span class="at">nfolds=</span><span class="dv">5</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">summary</span>(cvfit_spam_lin)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; Cross-validated Linear Model </span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; -----------------------</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; Penalty: ridge </span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 10 </span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 0.3158114 </span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.7777 (+/- 0.0232) </span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.7715 0.0167</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; 2  0.0199   0.7764 0.0194</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; 3  0.0398   0.7741 0.0215</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt; 4  0.0794   0.7748 0.0220</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; 5  0.1580   0.7758 0.0252</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; 6  0.3160   0.7777 0.0232</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; 7  0.6300   0.7735 0.0233</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt; 8  1.2600   0.7753 0.0192</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; 9  2.5100   0.7715 0.0199</span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; 10 5.0000   0.7722 0.0224</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_spam_lin)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Fit a kernel model</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>fit_spam_ker <span class="ot">&lt;-</span> <span class="fu">kroclearn</span>(X_train_spam, y_train_spam, <span class="at">lambda =</span> <span class="fl">0.1</span>, <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="fu">summary</span>(fit_spam_ker)</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co">#&gt; Kernel Model Summary </span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#&gt; -----------------------------</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co">#&gt; kroclearn(X = X_train_spam, y = y_train_spam, lambda = 0.1, kernel = &quot;radial&quot;)</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#&gt; Number of observations: 3000 </span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; Number of predictors: 57 </span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co">#&gt; Kernel parameter: 0.01754386 </span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="co">#&gt; Lambda: 0.1 </span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="co">#&gt; Loss function: hinge </span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co">#&gt; Approximation: Yes (Nystrom, B = 3000 )</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="co">#&gt;   Nystrom landmarks: 55 </span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co">#&gt; Intercept: 5e-04 </span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co">#&gt; Converged: TRUE </span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#&gt; Iterations: 607 </span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co">#&gt; Training time (sec): 0.78 </span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; Theta coefficients (first 10):</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="co">#&gt;  [1] -0.106694761  0.034588410 -0.155193553 -0.091769201  0.008358426</span></span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt;  [6]  0.039672217 -0.191470994 -0.079506402  0.013024674 -0.468039804</span></span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="co">#&gt; ...</span></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a><span class="co"># Predict decision scores</span></span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a>pred_score_spam_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_spam_ker, X_test_spam, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a><span class="fu">head</span>(pred_score_spam_ker)</span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a><span class="co">#&gt;             3             6             8            10            14 </span></span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a><span class="co">#&gt;  0.0005386429 -0.0461043933 -0.1537764925  0.0005388521 -0.3817359714 </span></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a><span class="co">#&gt;            15 </span></span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a><span class="co">#&gt;  0.0005386429</span></span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a></span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a><span class="co"># Predict classes {-1, 1}</span></span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a>pred_class_spam_ker <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_spam_ker, X_test_spam, <span class="at">type =</span> <span class="st">&quot;class&quot;</span>)</span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a><span class="fu">head</span>(pred_class_spam_ker)</span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a><span class="co">#&gt;  3  6  8 10 14 15 </span></span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a><span class="co">#&gt;  1 -1 -1  1 -1  1</span></span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a></span>
+<span id="cb17-43"><a href="#cb17-43" tabindex="-1"></a><span class="co"># AUC on the test set</span></span>
+<span id="cb17-44"><a href="#cb17-44" tabindex="-1"></a><span class="fu">auc</span>(fit_spam_ker, X_test_spam, y_test_spam)</span>
+<span id="cb17-45"><a href="#cb17-45" tabindex="-1"></a><span class="co">#&gt; [1] 0.7513072</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># 5-fold CV for kernel models </span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>cvfit_spam_ker <span class="ot">&lt;-</span> <span class="fu">cv.kroclearn</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  X_train_spam, y_train_spam,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  <span class="at">kernel =</span> <span class="st">&quot;radial&quot;</span>, </span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>  <span class="at">lambda.vec =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(<span class="fl">0.01</span>), <span class="fu">log</span>(<span class="dv">5</span>), <span class="at">length.out =</span> <span class="dv">10</span>)), <span class="at">nfolds=</span><span class="dv">5</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">summary</span>(cvfit_spam_ker)</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt; Cross-validated Kernel Model </span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">#&gt; ------------------------------</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt; Loss: hinge </span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt; Kernel: radial </span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="co">#&gt; Number of folds: 5 </span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt; Number of candidate lambdas: 10 </span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a><span class="co">#&gt; Optimal lambda: 5 </span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="co">#&gt; Cross-validated AUC at optimal lambda: 0.7385 (+/- 0.0146) </span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="co">#&gt; Overall AUC (mean +/- sd) across lambdas:</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="co">#&gt;    lambda auc.mean auc.sd</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="co">#&gt; 1  0.0100   0.7303 0.0146</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a><span class="co">#&gt; 2  0.0199   0.7173 0.0339</span></span>
+<span id="cb18-21"><a href="#cb18-21" tabindex="-1"></a><span class="co">#&gt; 3  0.0398   0.7301 0.0139</span></span>
+<span id="cb18-22"><a href="#cb18-22" tabindex="-1"></a><span class="co">#&gt; 4  0.0794   0.7287 0.0167</span></span>
+<span id="cb18-23"><a href="#cb18-23" tabindex="-1"></a><span class="co">#&gt; 5  0.1580   0.7258 0.0184</span></span>
+<span id="cb18-24"><a href="#cb18-24" tabindex="-1"></a><span class="co">#&gt; 6  0.3160   0.7196 0.0162</span></span>
+<span id="cb18-25"><a href="#cb18-25" tabindex="-1"></a><span class="co">#&gt; 7  0.6300   0.7281 0.0295</span></span>
+<span id="cb18-26"><a href="#cb18-26" tabindex="-1"></a><span class="co">#&gt; 8  1.2600   0.7331 0.0168</span></span>
+<span id="cb18-27"><a href="#cb18-27" tabindex="-1"></a><span class="co">#&gt; 9  2.5100   0.7259 0.0292</span></span>
+<span id="cb18-28"><a href="#cb18-28" tabindex="-1"></a><span class="co">#&gt; 10 5.0000   0.7385 0.0146</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Plot the cross-validation AUC across lambda values</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">plot</span>(cvfit_spam_ker)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The <strong>roclab</strong> package implements ROC-Optimizing Binary
+Classifiers through both <strong>linear models</strong> (with
+regularization penalties) and <strong>kernel models</strong> (with
+various kernel functions). It supports multiple surrogate loss functions
+and incorporates scalable options to efficiently handle large
+datasets.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
